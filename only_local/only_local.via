@@ -1,0 +1,8 @@
+fun main() {
+    var a_secret: int{alice} = input int from alice;
+    a_secret = a_secret + 1;
+    output a_secret to alice;
+}
+
+host alice
+host bob

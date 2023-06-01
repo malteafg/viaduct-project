@@ -1,0 +1,129 @@
+#!/bin/bash
+pids=()
+
+function init() {
+    source parsefolder "$@" || exit 1
+
+    if [ ! -d "$CAPTURE_PATH" ]; then
+        mkdir $CAPTURE_PATH
+    fi
+    if [ ! -d "$LOG_PATH" ]; then
+        mkdir "$LOG_PATH"
+    fi
+}
+
+function run_person() {
+    echo -e "Starting ${people[$i]}. Output at ${output_files[$i]}\n"
+    viaduct -v run ${people[$1]} $OUT_PATH -in ${input_files[$1]} &>> ${output_files[$1]} &
+    sleep 1
+    pids+=($!)
+}
+
+function show_graph() {
+    python3 processing_packages/show_graph.py "$(realpath $CAPTURE_FILE)" &
+}
+
+function classify_protocol() {
+    python3 processing_packages/classifier.py "$(realpath $CAPTURE_FILE)" "$(realpath $IMAGE_FILE)" "$(realpath $CLASSIFIER_FILE)"
+}
+
+function print_benchmark() {
+    echo "---------------------------------------------------------"
+    echo -e "Starting benchmark number $run_counter"
+}
+
+function benchmark() {
+    # Start tshark
+    tshark -i any -f "src host 127.0.0.1 and dst host 127.0.0.1" -w "$CAPTURE_FILE" > /dev/null 2>&1 &
+    tshark_pid=$!
+    echo -e "Started capturing packets. Outputting to $CAPTURE_FILE\n"
+
+    # Number of people participating
+    no_people=${#people[@]}
+
+    # Loop through the elements of the array
+    starttime=$(date +%s%N)
+    for (( i=0; i<$no_people; i++ )); do
+        # if [ $i -eq $(($no_people-1)) ]; then
+        #     run_person $i
+        # else
+        #     run_person $i &
+        # fi
+        run_person $i
+    done
+    for pid in "${pids[@]}"
+    do
+        wait "$pid"
+    done
+    endtime=$(date +%s%N)
+    elapsed=$(($(($endtime-$starttime))/1000000))
+    echo -e "Viaduct completed in $elapsed ms.\n"
+
+    # Stop capturing packets by killing the Wireshark process
+    echo -e "Stopped capturing packets"
+    kill $tshark_pid
+    echo "Benchmark completed."
+
+    check_success
+    if [ $? -eq 1 ]; then
+        echo "Benchmark unsuccessful, trying again"
+        rm -rf $LOG_PATH
+        init "$@"
+        benchmark "$@"
+    else
+        ((run_counter++))
+        echo "Benchmark was successful"
+        classify_protocol
+        echo -e "Protocol classification: \n$(cat $CLASSIFIER_FILE)."
+        if $show_graph; then
+            show_graph
+        fi
+    fi
+}
+
+function check_success() {
+    for person_output in "${output_files[@]}"; do
+        if grep -i "failed" $(realpath $person_output); then
+            return 1
+        fi
+    done
+    return 0
+}
+
+show_graph=false
+
+while getopts ":g" opt; do
+    case $opt in
+        g) 
+            show_graph=true
+            shift
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit
+            ;;
+    esac
+done
+
+num_runs=$1
+shift
+if expr "$num_runs" : '[0-9][0-9]*$' >/dev/null; then
+    num_runs="$num_runs"
+else
+    echo "Please input an integer first, for the number of benchmarks to run"
+    exit 1
+fi
+
+run_counter=1
+
+./compile "$@" || exit 1
+
+echo -e "Running $num_runs benchmarks\n"
+
+for (( j=0; j<$num_runs; j++ )); do
+    unset output_files
+    unset pids
+    init "$@"
+    print_benchmark
+    benchmark "$@"
+done

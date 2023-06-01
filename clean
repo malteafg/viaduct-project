@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source parsefolder "$@" || exit 1
+
+rm -rf $CAPTURE_PATH
+
+echo "Removed $CAPTURE_PATH"

@@ -1,0 +1,12 @@
+fun main() {
+    var a_secret: int{alice & bob<-} = input int from alice;
+    var b_secret: int{bob & alice<-} = input int from bob;
+    
+    val same: bool{alice & bob} = a_secret == b_secret;
+}
+
+host alice
+host bob
+
+assume for <- alice trusts bob
+assume for <- bob trusts alice

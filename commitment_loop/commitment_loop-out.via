@@ -1,0 +1,26 @@
+host alice
+
+host bob
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    var a_secret: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 1;
+    let $tmp@Local(host = bob) = input int from bob;
+    var b_secret: int{bob}@Local(host = bob) = $tmp;
+    loop {
+        let $tmp_1@Replication(hosts = {alice, bob}) = a_secret;
+        let $tmp_2@Replication(hosts = {alice, bob}) = ($tmp_1 > 5);
+        if ($tmp_2) {
+            break;
+        } else {
+            
+        }
+        let $tmp_3@Replication(hosts = {alice, bob}) = a_secret;
+        let $tmp_4@Replication(hosts = {alice, bob}) = ($tmp_3 + 1);
+        a_secret = $tmp_4;
+        let $tmp_5@Local(host = bob) = b_secret;
+        let $tmp_6@Commitment(receivers = {alice}, sender = bob) = endorse $tmp_5 to {(bob & alice<-)} from {bob};
+        var trusted_secret_1: int{(bob & alice<-)}@Commitment(receivers = {alice}, sender = bob) = $tmp_6;
+        let $tmp_7@Commitment(receivers = {alice}, sender = bob) = trusted_secret_1;
+        output $tmp_7 to bob;
+    }
+}

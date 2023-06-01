@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Check if at least one argument is provided
+if [ $# -eq 0 ]; then
+  echo "Please provide at least one argument"
+  exit 1
+fi
+
+# Store the first argument in a variable
+FOLDER=$1
+
+# Check if the folder exists
+if [ ! -d "$FOLDER" ]; then
+  echo "The folder $FOLDER does not exist"
+  exit 1
+fi
+
+FOLDER=${FOLDER%/}
+CAPTURE_PATH="$FOLDER/captures"
+LOG_PATH="$CAPTURE_PATH/$(date +%H-%M-%S_%d-%m)"
+CAPTURE_FILE="$LOG_PATH/packets.pcap"
+SRC_PATH="$FOLDER/$FOLDER.via"
+OUT_PATH="$FOLDER/$FOLDER-out.via"
+IMAGE_FILE="$LOG_PATH/graph.png"
+CLASSIFIER_FILE="$LOG_PATH/classification.txt"
+
+if [ ! -e "$SRC_PATH" ]; then
+  echo "Source file does not exist: $SRC_PATH"
+  exit 1
+fi
+
+# Create an empty array to store the remaining arguments
+people=()
+input_files=()
+output_files=()
+
+# Loop through the remaining arguments and add them to the array
+for arg in "${@:2}"
+do
+  people+=("$arg")
+done
+
+# If no people are added we just put alice and bob as defaults
+if [ ${#people[@]} -eq 0 ]; then
+  people+=("alice")
+  people+=("bob")
+fi
+
+for person in "${people[@]}"
+do
+  person_input="$FOLDER/input_$person.txt"
+  if [ ! -e "$person_input" ]; then
+    echo "Input file for $person does not exist: $person_input"
+    exit 1
+  fi
+  input_files+=("$person_input")
+
+  person_output="$LOG_PATH/$person"
+  person_output+="_out.log"
+  output_files+=("$person_output")
+done
+
+for person in "${people[@]}"
+do
+  person_input="$FOLDER/input_$person.txt"
+  input_files+=("$person_input")
+done
+
+# # Display the variable and array contents
+# echo "folder: $FOLDER"
+# echo "people: ${people[@]}"
+# echo "inputs: ${input_files[@]}"
+# echo "outputs: ${output_files[@]}"
+# echo "capture path: $CAPTURE_FILE"

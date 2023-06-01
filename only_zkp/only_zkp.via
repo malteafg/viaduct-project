@@ -1,0 +1,11 @@
+fun main() {
+    var b_secret: int{bob} = input int from bob;
+
+    var trusted_secret: int{bob & alice<-} = endorse b_secret to {bob & alice<-} from {bob};
+
+    trusted_secret = trusted_secret + 2;
+    output trusted_secret to bob;
+}
+
+host alice
+host bob

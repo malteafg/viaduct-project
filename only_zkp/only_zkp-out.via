@@ -1,0 +1,16 @@
+host alice
+
+host bob
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    let $tmp@Local(host = bob) = input int from bob;
+    var b_secret: int{bob}@Local(host = bob) = $tmp;
+    let $tmp_1@Local(host = bob) = b_secret;
+    let $tmp_2@ZKP(prover = bob, verifiers = {alice}) = endorse $tmp_1 to {(bob & alice<-)} from {bob};
+    var trusted_secret: int{(bob & alice<-)}@ZKP(prover = bob, verifiers = {alice}) = $tmp_2;
+    let $tmp_3@ZKP(prover = bob, verifiers = {alice}) = trusted_secret;
+    let $tmp_4@ZKP(prover = bob, verifiers = {alice}) = ($tmp_3 + 2);
+    trusted_secret = $tmp_4;
+    let $tmp_5@ZKP(prover = bob, verifiers = {alice}) = trusted_secret;
+    output $tmp_5 to bob;
+}

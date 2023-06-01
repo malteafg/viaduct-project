@@ -1,0 +1,32 @@
+#!/bin/bash
+
+source parsefolder "$@" || exit 1
+
+if [ ! -d "$LOG_PATH" ]; then
+  mkdir "$LOG_PATH"
+fi
+
+# Compile the program
+./compile "$FOLDER"
+
+# Start tshark
+tshark -i any -f "src host 127.0.0.1 and dst host 127.0.0.1" -w "$CAPTURE_FILE" > /dev/null 2>&1 &
+tshark_pid=$!
+echo -e "\n\nStarted capturing packets. Outputting to $CAPTURE_FILE\n\n"
+
+# Number of people participating
+no_people=${#people[@]}
+
+# Loop through the elements of the array
+for (( i=0; i<$no_people; i++ )); do
+  echo -e "Starting ${people[$i]}. Output at ${output_files[$i]}\n\n"
+  if [ $i -eq $(($no_people-1)) ]; then
+    viaduct -v run ${people[$i]} $OUT_PATH -in ${input_files[$i]} 2> ${output_files[$i]}
+  else
+    viaduct -v run ${people[$i]} $OUT_PATH -in ${input_files[$i]} 2> ${output_files[$i]} &
+  fi
+done
+
+# Stop capturing packets by killing the Wireshark process
+echo -e "\n\nStopped capturing packets\n\n"
+kill $tshark_pid

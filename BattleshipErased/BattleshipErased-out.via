@@ -1,0 +1,195 @@
+host alice
+
+host bob
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    val aships = Array[int]@ZKP(prover = alice, verifiers = {bob})(5);
+    val bships = Array[int]@ZKP(prover = bob, verifiers = {alice})(5);
+    var i: int@Replication(hosts = {alice, bob}) = 0;
+    loop {
+        let $tmp@Replication(hosts = {alice, bob}) = i;
+        let $tmp_1@Replication(hosts = {alice, bob}) = ($tmp < 5);
+        if ($tmp_1) {
+            let $tmp_2@Replication(hosts = {alice, bob}) = i;
+            let $tmp_3@Local(host = alice) = input int from alice;
+            let $tmp_4@ZKP(prover = alice, verifiers = {bob}) = endorse $tmp_3 from {alice};
+            aships[$tmp_2] = $tmp_4;
+            let $tmp_5@Replication(hosts = {alice, bob}) = i;
+            let $tmp_6@Local(host = bob) = input int from bob;
+            let $tmp_7@ZKP(prover = bob, verifiers = {alice}) = endorse $tmp_6 from {bob};
+            bships[$tmp_5] = $tmp_7;
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    var awins: bool@Replication(hosts = {alice, bob}) = false;
+    var acheated: bool@Replication(hosts = {alice, bob}) = false;
+    var bcheated: bool@Replication(hosts = {alice, bob}) = false;
+    var j: int@Replication(hosts = {alice, bob}) = 0;
+    loop {
+        let $tmp_8@Replication(hosts = {alice, bob}) = j;
+        let $tmp_9@Replication(hosts = {alice, bob}) = ($tmp_8 < 5);
+        let $tmp_10@Replication(hosts = {alice, bob}) = acheated;
+        let $tmp_11@Replication(hosts = {alice, bob}) = (!$tmp_10);
+        let $tmp_12@Replication(hosts = {alice, bob}) = ($tmp_9 && $tmp_11);
+        let $tmp_13@Replication(hosts = {alice, bob}) = bcheated;
+        let $tmp_14@Replication(hosts = {alice, bob}) = (!$tmp_13);
+        let $tmp_15@Replication(hosts = {alice, bob}) = ($tmp_12 && $tmp_14);
+        if ($tmp_15) {
+            let $tmp_16@Replication(hosts = {alice, bob}) = j;
+            let $tmp_17@Replication(hosts = {alice, bob}) = ($tmp_16 + 1);
+            var k: int@Replication(hosts = {alice, bob}) = $tmp_17;
+            loop {
+                let $tmp_18@Replication(hosts = {alice, bob}) = k;
+                let $tmp_19@Replication(hosts = {alice, bob}) = ($tmp_18 < 5);
+                let $tmp_20@Replication(hosts = {alice, bob}) = acheated;
+                let $tmp_21@Replication(hosts = {alice, bob}) = (!$tmp_20);
+                let $tmp_22@Replication(hosts = {alice, bob}) = ($tmp_19 && $tmp_21);
+                let $tmp_23@Replication(hosts = {alice, bob}) = bcheated;
+                let $tmp_24@Replication(hosts = {alice, bob}) = (!$tmp_23);
+                let $tmp_25@Replication(hosts = {alice, bob}) = ($tmp_22 && $tmp_24);
+                if ($tmp_25) {
+                    let $tmp_26@Replication(hosts = {alice, bob}) = j;
+                    let $tmp_27@ZKP(prover = alice, verifiers = {bob}) = aships[$tmp_26];
+                    let $tmp_28@Replication(hosts = {alice, bob}) = k;
+                    let $tmp_29@ZKP(prover = alice, verifiers = {bob}) = aships[$tmp_28];
+                    let $tmp_30@ZKP(prover = alice, verifiers = {bob}) = ($tmp_27 == $tmp_29);
+                    let $tmp_31@Replication(hosts = {alice, bob}) = declassify $tmp_30 to {(alice ⊓ bob)};
+                    if ($tmp_31) {
+                        acheated = true;
+                    } else {
+                        
+                    }
+                    let $tmp_32@Replication(hosts = {alice, bob}) = j;
+                    let $tmp_33@ZKP(prover = bob, verifiers = {alice}) = bships[$tmp_32];
+                    let $tmp_34@Replication(hosts = {alice, bob}) = k;
+                    let $tmp_35@ZKP(prover = bob, verifiers = {alice}) = bships[$tmp_34];
+                    let $tmp_36@ZKP(prover = bob, verifiers = {alice}) = ($tmp_33 == $tmp_35);
+                    let $tmp_37@Replication(hosts = {alice, bob}) = declassify $tmp_36 to {(alice ⊓ bob)};
+                    if ($tmp_37) {
+                        bcheated = true;
+                    } else {
+                        
+                    }
+                    k += 1;
+                } else {
+                    break;
+                }
+            }
+            j += 1;
+        } else {
+            break;
+        }
+    }
+    let $tmp_38@Replication(hosts = {alice, bob}) = acheated;
+    let $tmp_39@Replication(hosts = {alice, bob}) = (!$tmp_38);
+    let $tmp_40@Replication(hosts = {alice, bob}) = bcheated;
+    let $tmp_41@Replication(hosts = {alice, bob}) = (!$tmp_40);
+    let $tmp_42@Replication(hosts = {alice, bob}) = ($tmp_39 && $tmp_41);
+    if ($tmp_42) {
+        var ascore: int@Replication(hosts = {alice, bob}) = 0;
+        var bscore: int@Replication(hosts = {alice, bob}) = 0;
+        var playing: bool@Replication(hosts = {alice, bob}) = true;
+        var aturn: bool@Replication(hosts = {alice, bob}) = true;
+        loop {
+            let $tmp_43@Replication(hosts = {alice, bob}) = playing;
+            if ($tmp_43) {
+                let $tmp_44@Replication(hosts = {alice, bob}) = aturn;
+                if ($tmp_44) {
+                    let $tmp_45@Local(host = alice) = input int from alice;
+                    let $tmp_46@Local(host = alice) = declassify $tmp_45 to {((alice | bob)-> & alice<-)};
+                    val amove: int@Local(host = alice) = $tmp_46;
+                    let $tmp_47@Local(host = alice) = amove;
+                    let $tmp_48@Replication(hosts = {alice, bob}) = endorse $tmp_47 from {((alice | bob)-> & alice<-)};
+                    var amove_trusted: int@Replication(hosts = {alice, bob}) = $tmp_48;
+                    var ahit: bool@Replication(hosts = {alice, bob}) = false;
+                    var aj: int@Replication(hosts = {alice, bob}) = 0;
+                    loop {
+                        let $tmp_49@Replication(hosts = {alice, bob}) = aj;
+                        let $tmp_50@Replication(hosts = {alice, bob}) = ($tmp_49 < 5);
+                        if ($tmp_50) {
+                            let $tmp_51@Replication(hosts = {alice, bob}) = aj;
+                            let $tmp_52@ZKP(prover = bob, verifiers = {alice}) = bships[$tmp_51];
+                            let $tmp_53@Replication(hosts = {alice, bob}) = amove_trusted;
+                            let $tmp_54@ZKP(prover = bob, verifiers = {alice}) = ($tmp_52 == $tmp_53);
+                            let $tmp_55@Replication(hosts = {alice, bob}) = declassify $tmp_54 to {(alice ⊓ bob)};
+                            if ($tmp_55) {
+                                ascore += 1;
+                                let $tmp_56@Replication(hosts = {alice, bob}) = aj;
+                                bships[$tmp_56] = 0;
+                                ahit = true;
+                            } else {
+                                
+                            }
+                            aj += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    let $tmp_57@Replication(hosts = {alice, bob}) = ahit;
+                    output $tmp_57 to alice;
+                    let $tmp_58@Replication(hosts = {alice, bob}) = ahit;
+                    output $tmp_58 to bob;
+                    aturn = false;
+                } else {
+                    let $tmp_59@Local(host = bob) = input int from bob;
+                    let $tmp_60@Local(host = bob) = declassify $tmp_59 to {((alice | bob)-> & bob<-)};
+                    var bmove: int@Local(host = bob) = $tmp_60;
+                    let $tmp_61@Local(host = bob) = bmove;
+                    let $tmp_62@Replication(hosts = {alice, bob}) = endorse $tmp_61 from {((alice | bob)-> & bob<-)};
+                    val bmove_trusted: int@Replication(hosts = {alice, bob}) = $tmp_62;
+                    var bhit: bool@Replication(hosts = {alice, bob}) = false;
+                    var bj: int@Replication(hosts = {alice, bob}) = 0;
+                    loop {
+                        let $tmp_63@Replication(hosts = {alice, bob}) = bj;
+                        let $tmp_64@Replication(hosts = {alice, bob}) = ($tmp_63 < 5);
+                        if ($tmp_64) {
+                            let $tmp_65@Replication(hosts = {alice, bob}) = bj;
+                            let $tmp_66@ZKP(prover = alice, verifiers = {bob}) = aships[$tmp_65];
+                            let $tmp_67@Replication(hosts = {alice, bob}) = bmove_trusted;
+                            let $tmp_68@ZKP(prover = alice, verifiers = {bob}) = ($tmp_66 == $tmp_67);
+                            let $tmp_69@Replication(hosts = {alice, bob}) = declassify $tmp_68 to {(alice ⊓ bob)};
+                            if ($tmp_69) {
+                                bscore += 1;
+                                let $tmp_70@Replication(hosts = {alice, bob}) = bj;
+                                aships[$tmp_70] = 0;
+                                bhit = true;
+                            } else {
+                                
+                            }
+                            bj += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    let $tmp_71@Replication(hosts = {alice, bob}) = bhit;
+                    output $tmp_71 to alice;
+                    let $tmp_72@Replication(hosts = {alice, bob}) = bhit;
+                    output $tmp_72 to bob;
+                    aturn = true;
+                }
+                let $tmp_73@Replication(hosts = {alice, bob}) = ascore;
+                let $tmp_74@Replication(hosts = {alice, bob}) = ($tmp_73 < 5);
+                let $tmp_75@Replication(hosts = {alice, bob}) = bscore;
+                let $tmp_76@Replication(hosts = {alice, bob}) = ($tmp_75 < 5);
+                let $tmp_77@Replication(hosts = {alice, bob}) = ($tmp_74 && $tmp_76);
+                playing = $tmp_77;
+            } else {
+                break;
+            }
+        }
+        let $tmp_78@Replication(hosts = {alice, bob}) = ascore;
+        let $tmp_79@Replication(hosts = {alice, bob}) = ($tmp_78 == 5);
+        awins = $tmp_79;
+        let $tmp_80@Replication(hosts = {alice, bob}) = awins;
+        output $tmp_80 to alice;
+        let $tmp_81@Replication(hosts = {alice, bob}) = awins;
+        output $tmp_81 to bob;
+    } else {
+        let $tmp_82@Replication(hosts = {alice, bob}) = bcheated;
+        output $tmp_82 to alice;
+        let $tmp_83@Replication(hosts = {alice, bob}) = bcheated;
+        output $tmp_83 to bob;
+    }
+}

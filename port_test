@@ -1,0 +1,118 @@
+#!/bin/bash
+
+alice_ports=()
+bob_ports=()
+
+monitored_ports=()
+open_ports=$(netstat -tuln | awk '{print $4}' | awk -F':' '{print $NF}' | sort -nu)
+for port in $open_ports; do
+    monitored_ports+=("$port")
+done
+
+rm /tmp.pcap
+tshark -i any -f "src host 127.0.0.1 and dst host 127.0.0.1" -w "/tmp.pcap" > /dev/null 2>&1 &
+tshark_pid=$!
+
+# Run the command
+viaduct run alice historical-millionaires/historical-millionaires-out.via -in historical-millionaires/input_alice.txt &
+alice_pid=$!
+
+viaduct run bob historical-millionaires/historical-millionaires-out.via -in historical-millionaires/input_bob.txt &
+bob_pid=$!
+
+echo "Alice's pid: $alice_pid"
+echo "Bob's pid: $bob_pid"
+
+# ./port_from_pid $alice_pid
+# ./port_from_pid $bob_pid
+
+while true; do
+    # netstat -tuln | awk '{print $4}'
+    # netstat -tuln | awk '{print $4}' | awk -F':' '{print $NF}'
+    # echo -e "\n\n-----------------------------------------\n\n"
+    # Get the list of open ports
+    open_ports=$(netstat -tun | awk '{print $4}' | awk -F':' '{print $NF}' | sort -nu)
+
+    # Iterate over each open port
+    for port in $open_ports; do
+        # Check if the port is already monitored
+        if [[ ! " ${monitored_ports[@]} " =~ " ${port} " ]]; then
+            monitored_ports+=("$port")  # Add the new port to the monitored ports array
+
+            # ./port_from_pid $alice_pid
+            # echo "New port detected: $port"
+            # lsof -i :$port
+            # echo "port is used by: $(lsof -i :$port | grep LISTEN | awk '{print $2}')"
+            # echo ""
+
+            # echo "Alice's process tree"
+            # ./get_all_subprocesses $alice_pid
+            echo -e "\nAlice:"
+            echo "$(./get_all_subprocesses $alice_pid)" | while IFS= read -r line; do
+                ./port_from_pid $line
+            done
+
+            # echo "Bob's process tree"
+            # ./get_all_subprocesses $bob_pid
+            echo -e "\nBob:"
+            echo "$(./get_all_subprocesses $bob_pid)" | while IFS= read -r line; do
+                ./port_from_pid $line
+            done
+        fi
+    done
+    if ! kill -0 $alice_pid 2>/dev/null; then
+        break
+    fi
+done
+
+echo "${monitored_ports[@]}"
+kill $tshark_pid
+python3 processing_packages/ports_chronologically.py "/tmp.pcap"
+
+# while true; do
+#     # Get the list of open ports used by the process
+#     # netstat -tlnp | grep $alice_pid
+#     echo -e "\n\nAlice's id: $alice_pid"
+#     netstat -tlnp 
+#     pids=$(netstat -tlnp | awk '{print $7}')
+#     for pid in $pids; do
+#         if [[ ! $pid == *"containerd"* ]]; then
+#             if [[ ! $pid == *"dnsmasq"* ]]; then
+#                 pid="${pid%%/*}"
+#                 if [[ $pid =~ ^[0-9]+$ ]]; then
+#                     echo $pid
+#                     echo $(ps -o ppid= $pid)
+#                 fi
+#             fi
+#         fi
+#     done
+
+#     # echo $(lsof -i -P -n -p $alice_pid)
+#     echo $(lsof -i -P -n -p $alice_pid | awk 'NR>1 {print $9}')
+#     new_alice_ports=($(lsof -i -P -n -p $alice_pid | awk 'NR>1 {print $9}' | awk -F ":" '{print $NF}'))
+#     new_bob_ports=($(lsof -i -P -n -p $bob_pid | awk 'NR>1 {print $9}' | awk -F ":" '{print $NF}'))
+
+#     # Compare the ports with the previous run
+#     for port in "${new_alice_ports[@]}"; do
+#         if [[ $port =~ ^[0-9]+$ ]]; then
+
+#             [[ " ${alice_ports[*]} " != *" $port "* ]] && alice_ports+=("$port")
+#             # alice_ports+=("$port")
+#         fi
+#     done
+#     for port in "${new_bob_ports[@]}"; do
+#         if [[ $port =~ ^[0-9]+$ ]]; then
+#             [[ " ${bob_ports[*]} " != *" $port "* ]] && bob_ports+=("$port")
+#             # bob_ports+=("$port")
+#         fi
+#     done
+
+#     sleep 1
+#     # Check if the process has finished
+#     if ! kill -0 $alice_pid 2>/dev/null; then
+#         break
+#     fi
+# done
+
+# echo "Alice's ports: ${alice_ports[*]}"
+# echo "Bob's ports: ${bob_ports[*]}"

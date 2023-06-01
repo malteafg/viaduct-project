@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for arg in "${@}"
+do
+  python3 processing_packages/show_graph.py "$(realpath $arg)/packets.pcap" &
+done

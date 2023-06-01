@@ -1,0 +1,14 @@
+fun main() {
+    var a_secret: bool{alice} = input bool from alice;
+    var b_secret: bool{bob} = input bol from bob;
+
+    val high_integrity: bool{bob & alice<-} = endorse (input bool from bob) to {bob & alice<-} from {bob};
+    
+    if (b_secret) {
+        val same: bool{alice ⊓ bob} = declassify (b_secret == high_integrity) to {alice ⊓ bob};
+        output same to bob;
+    }
+}
+
+host alice
+host bob

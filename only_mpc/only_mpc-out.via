@@ -1,0 +1,18 @@
+host alice
+
+host bob
+
+assume for <- alice trusts bob
+
+assume for <- bob trusts alice
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    let $tmp@Local(host = alice) = input int from alice;
+    var a_secret: int{(alice & bob<-)}@Local(host = alice) = $tmp;
+    let $tmp_1@Local(host = bob) = input int from bob;
+    var b_secret: int{(bob & alice<-)}@Local(host = bob) = $tmp_1;
+    let $tmp_2@Local(host = alice) = a_secret;
+    let $tmp_3@Local(host = bob) = b_secret;
+    let $tmp_4@YaoABY(client = bob, server = alice) = ($tmp_2 == $tmp_3);
+    val same: bool{(alice & bob)}@YaoABY(client = bob, server = alice) = $tmp_4;
+}

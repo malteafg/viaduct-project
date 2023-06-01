@@ -1,0 +1,8 @@
+fun main() {
+    var b_secret: int{bob} = input int from bob;
+    
+    var commited_secret: int{bob & alice<-} = endorse b_secret to {bob & alice<-} from {bob};
+}
+
+host alice
+host bob

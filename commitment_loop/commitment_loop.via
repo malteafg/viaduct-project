@@ -1,0 +1,19 @@
+fun main() {
+    var a_secret: int{alice ⊓ bob} = 1;
+    var b_secret: int{bob} = input int from bob;
+
+    loop {
+
+        if (a_secret > 5) {
+            break;
+        }
+
+        a_secret = a_secret + 1;
+
+        var trusted_secret_1: int{bob & alice<-} = endorse b_secret to {bob & alice<-} from {bob};
+        output trusted_secret_1 to bob;
+    }
+}
+
+host alice
+host bob

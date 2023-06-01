@@ -1,0 +1,25 @@
+#!/bin/bash
+
+for pid in "$@"; do
+    # Retrieve the list of network connections for the specified process ID
+    connections=$(lsof -nP -i -P -a -p "$pid" -sTCP:LISTEN)
+    # lsof -nP -P -a -p "$pid"
+    # lsof -i -a -p "$pid"
+
+    # Extract the ports from the connections
+    ports=$(echo "$connections" | awk 'NR>1 {print $9}' | awk -F ':' '{print $NF}')
+
+    # echo $ports
+    # Display the ports
+    for port in "$ports"; do
+        if [ ! -z "$ports" ]; then
+            echo "$pid: $port"
+        fi
+    done
+    # if [ -z "$ports" ]; then
+    #     echo "No ports found for process ID: $pid"
+    # else
+    #     echo "Ports used by process ID $pid:"
+    #     echo "$ports"
+    # fi
+done

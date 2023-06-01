@@ -1,0 +1,34 @@
+fun main() {
+    val aships = Array[int]{alice & bob<-}(10);
+    val bships = Array[int]{bob & alice<-}(10);
+    for (var i: int = 0; i < 5; i+=1) {
+        aships[i] = 2;
+        bships[i] = 2;
+    }
+    val a0: int{alice ⊓ bob} = 5;
+    val a1: int{alice ⊓ bob} = 5;
+    val a2: int{alice ⊓ bob} = 5;
+    val a3: int{alice ⊓ bob} = 5;
+    val a4: int{alice ⊓ bob} = 5;
+    val a5: int{alice ⊓ bob} = 5;
+    val a6: int{alice ⊓ bob} = 5;
+    val a7: int{alice ⊓ bob} = 5;
+    val a8: int{alice ⊓ bob} = 5;
+    val a9: int{alice ⊓ bob} = 5;
+    val a10: int{alice ⊓ bob} = 5;
+    val a11: int{alice ⊓ bob} = 5;
+    val a12: int{alice ⊓ bob} = 5;
+    val a13: int{alice ⊓ bob} = 5;
+    val a14: int{alice ⊓ bob} = 5;
+    val a15: int{alice ⊓ bob} = 5;
+    val a16: int{alice ⊓ bob} = 5;
+    val a17: int{alice ⊓ bob} = 5;
+    val a18: int{alice ⊓ bob} = 5;
+    val a19: int{alice ⊓ bob} = 5;
+    val a20: int{alice ⊓ bob} = 5;
+    val a21: int{alice ⊓ bob} = 5;
+    val a22: int{alice ⊓ bob} = 5;
+}
+
+host alice
+host bob

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# for arg in "${@}"
+# do
+#   python3 processing_packages/print_ports.py "$(realpath $arg)/packets.pcap"
+# done
+
+# Command to run
+
+# Array to store output lines
+output=()
+
+# Run the command multiple times and store the output lines in the array
+for arg in "${@}"; do
+  output+=("$(python3 processing_packages/print_ports.py "$(realpath $arg)/packets.pcap" | wc -l)")
+done
+echo "$output"
+
+# Determine the maximum number of lines in the output
+max_lines=0
+for line in "${output[@]}"; do
+    num_lines=$(echo "$line" | wc -l)
+    (( num_lines > max_lines )) && max_lines=$num_lines
+done
+
+# Concatenate the corresponding lines from each output
+for ((i=1; i<=max_lines; i++)); do
+    combined_line=""
+    for line in "${output[@]}"; do
+        current_line=$(echo "$line" | sed -n "${i}p")
+        combined_line+="$current_line\t\t"  # Add additional tab spacing
+    done
+    echo -e "$combined_line"
+done

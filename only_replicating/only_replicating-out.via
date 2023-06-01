@@ -1,0 +1,45 @@
+host alice
+
+host bob
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    val aships = Array[int]{(alice & bob<-)}@Commitment(receivers = {bob}, sender = alice)(10);
+    val bships = Array[int]{(bob & alice<-)}@Commitment(receivers = {alice}, sender = bob)(10);
+    var i: int@Replication(hosts = {alice, bob}) = 0;
+    loop {
+        let $tmp@Replication(hosts = {alice, bob}) = i;
+        let $tmp_1@Replication(hosts = {alice, bob}) = ($tmp < 5);
+        if ($tmp_1) {
+            let $tmp_2@Replication(hosts = {alice, bob}) = i;
+            aships[$tmp_2] = 2;
+            let $tmp_3@Replication(hosts = {alice, bob}) = i;
+            bships[$tmp_3] = 2;
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    val a0: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a1: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a2: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a3: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a4: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a5: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a6: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a7: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a8: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a9: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a10: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a11: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a12: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a13: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a14: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a15: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a16: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a17: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a18: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a19: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a20: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a21: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+    val a22: int{(alice ⊓ bob)}@Replication(hosts = {alice, bob}) = 5;
+}

@@ -1,0 +1,11 @@
+host alice
+
+host bob
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    let $tmp@Local(host = bob) = input int from bob;
+    var b_secret: int{bob}@Local(host = bob) = $tmp;
+    let $tmp_1@Local(host = bob) = b_secret;
+    let $tmp_2@Commitment(receivers = {alice}, sender = bob) = endorse $tmp_1 to {(bob & alice<-)} from {bob};
+    var commited_secret: int{(bob & alice<-)}@Commitment(receivers = {alice}, sender = bob) = $tmp_2;
+}

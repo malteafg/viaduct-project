@@ -1,0 +1,105 @@
+host alice
+
+host bob
+
+host chuck
+
+assume for <- alice trusts bob
+
+assume for <- bob trusts alice
+
+fun main{}() where () : {(⊥<- & ⊤->)} {
+    val a_num_points: int{((alice ⊓ bob) ⊓ chuck->)}@Replication(hosts = {alice, bob, chuck}) = 5;
+    val b_num_points: int{((alice ⊓ bob) ⊓ chuck->)}@Replication(hosts = {alice, bob, chuck}) = 5;
+    let $tmp@Replication(hosts = {alice, bob, chuck}) = a_num_points;
+    let $tmp_1@Replication(hosts = {alice, bob, chuck}) = b_num_points;
+    let $tmp_2@Replication(hosts = {alice, bob, chuck}) = ($tmp + $tmp_1);
+    val num_points: int{((alice ⊓ bob) ⊓ chuck->)}@Replication(hosts = {alice, bob, chuck}) = $tmp_2;
+    let $tmp_3@Local(host = chuck) = input int from chuck;
+    let $tmp_4@ZKP(prover = chuck, verifiers = {alice}) = endorse $tmp_3 to {(chuck & (alice & bob)<-)} from {chuck};
+    val chuck_point: int{(chuck & (alice & bob)<-)}@ZKP(prover = chuck, verifiers = {alice}) = $tmp_4;
+    let $tmp_5@Replication(hosts = {alice, bob, chuck}) = num_points;
+    val points = Array[int]{(alice & bob)}@YaoABY(client = bob, server = alice)($tmp_5);
+    var i: int{((alice ⊓ bob) ⊓ chuck->)}@Replication(hosts = {alice, bob, chuck}) = 0;
+    loop {
+        let $tmp_6@Replication(hosts = {alice, bob, chuck}) = i;
+        let $tmp_7@Replication(hosts = {alice, bob, chuck}) = a_num_points;
+        let $tmp_8@Replication(hosts = {alice, bob, chuck}) = ($tmp_6 < $tmp_7);
+        if ($tmp_8) {
+            let $tmp_9@Replication(hosts = {alice, bob, chuck}) = i;
+            let $tmp_10@Local(host = alice) = input int from alice;
+            points[$tmp_9] = $tmp_10;
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    var i_1: int{((alice ⊓ bob) ⊓ chuck->)}@Replication(hosts = {alice, bob, chuck}) = 0;
+    loop {
+        let $tmp_11@Replication(hosts = {alice, bob, chuck}) = i_1;
+        let $tmp_12@Replication(hosts = {alice, bob, chuck}) = b_num_points;
+        let $tmp_13@Replication(hosts = {alice, bob, chuck}) = ($tmp_11 < $tmp_12);
+        if ($tmp_13) {
+            let $tmp_14@Replication(hosts = {alice, bob, chuck}) = a_num_points;
+            let $tmp_15@Replication(hosts = {alice, bob, chuck}) = i_1;
+            let $tmp_16@Replication(hosts = {alice, bob, chuck}) = ($tmp_14 + $tmp_15);
+            let $tmp_17@Local(host = bob) = input int from bob;
+            points[$tmp_16] = $tmp_17;
+            i_1 += 1;
+        } else {
+            break;
+        }
+    }
+    let $tmp_18@YaoABY(client = bob, server = alice) = points[0];
+    var min_point: int{(alice & bob)}@YaoABY(client = bob, server = alice) = $tmp_18;
+    let $tmp_19@YaoABY(client = bob, server = alice) = points[0];
+    var max_point: int{(alice & bob)}@YaoABY(client = bob, server = alice) = $tmp_19;
+    var i_2: int{((alice ⊓ bob) ⊓ chuck->)}@Replication(hosts = {alice, bob, chuck}) = 1;
+    loop {
+        let $tmp_20@Replication(hosts = {alice, bob, chuck}) = i_2;
+        let $tmp_21@Replication(hosts = {alice, bob, chuck}) = num_points;
+        let $tmp_22@Replication(hosts = {alice, bob, chuck}) = ($tmp_20 < $tmp_21);
+        if ($tmp_22) {
+            let $tmp_23@YaoABY(client = bob, server = alice) = min_point;
+            let $tmp_24@Replication(hosts = {alice, bob, chuck}) = i_2;
+            let $tmp_25@YaoABY(client = bob, server = alice) = points[$tmp_24];
+            let $tmp_26@YaoABY(client = bob, server = alice) = (min($tmp_23, $tmp_25));
+            min_point = $tmp_26;
+            let $tmp_27@YaoABY(client = bob, server = alice) = max_point;
+            let $tmp_28@Replication(hosts = {alice, bob, chuck}) = i_2;
+            let $tmp_29@YaoABY(client = bob, server = alice) = points[$tmp_28];
+            let $tmp_30@YaoABY(client = bob, server = alice) = (max($tmp_27, $tmp_29));
+            max_point = $tmp_30;
+            i_2 += 1;
+        } else {
+            break;
+        }
+    }
+    let $tmp_31@YaoABY(client = bob, server = alice) = min_point;
+    let $tmp_32@Local(host = alice) = declassify $tmp_31 to {((alice ⊓ bob) ⊓ chuck->)};
+    val min_point_public: int{((alice ⊓ bob) ⊓ chuck->)}@Local(host = alice) = $tmp_32;
+    let $tmp_33@YaoABY(client = bob, server = alice) = max_point;
+    let $tmp_34@Local(host = alice) = declassify $tmp_33 to {((alice ⊓ bob) ⊓ chuck->)};
+    val max_point_public: int{((alice ⊓ bob) ⊓ chuck->)}@Local(host = alice) = $tmp_34;
+    let $tmp_35@Local(host = alice) = min_point_public;
+    let $tmp_36@Replication(hosts = {alice, chuck}) = endorse $tmp_35 to {((alice ⊓ bob) ⊓ chuck)} from {((alice ⊓ bob) ⊓ chuck->)};
+    val min_point_trusted: int{((alice ⊓ bob) ⊓ chuck)}@Replication(hosts = {alice, chuck}) = $tmp_36;
+    let $tmp_37@Local(host = alice) = max_point_public;
+    let $tmp_38@Replication(hosts = {alice, chuck}) = endorse $tmp_37 to {((alice ⊓ bob) ⊓ chuck)} from {((alice ⊓ bob) ⊓ chuck->)};
+    val max_point_trusted: int{((alice ⊓ bob) ⊓ chuck)}@Replication(hosts = {alice, chuck}) = $tmp_38;
+    let $tmp_39@Replication(hosts = {alice, chuck}) = min_point_trusted;
+    let $tmp_40@ZKP(prover = chuck, verifiers = {alice}) = chuck_point;
+    let $tmp_41@ZKP(prover = chuck, verifiers = {alice}) = ($tmp_39 <= $tmp_40);
+    let $tmp_42@ZKP(prover = chuck, verifiers = {alice}) = chuck_point;
+    let $tmp_43@Replication(hosts = {alice, chuck}) = max_point_trusted;
+    let $tmp_44@ZKP(prover = chuck, verifiers = {alice}) = ($tmp_42 <= $tmp_43);
+    let $tmp_45@ZKP(prover = chuck, verifiers = {alice}) = ($tmp_41 && $tmp_44);
+    val in_interval: bool{(chuck & (alice & bob)<-)}@ZKP(prover = chuck, verifiers = {alice}) = $tmp_45;
+    let $tmp_46@ZKP(prover = chuck, verifiers = {alice}) = in_interval;
+    let $tmp_47@Local(host = alice) = declassify $tmp_46 to {((alice ⊓ bob) ⊓ chuck)};
+    val in_interval_public: bool{((alice ⊓ bob) ⊓ chuck->)}@Local(host = alice) = $tmp_47;
+    let $tmp_48@Local(host = alice) = in_interval_public;
+    output $tmp_48 to alice;
+    let $tmp_49@Local(host = alice) = in_interval_public;
+    output $tmp_49 to bob;
+}

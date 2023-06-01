@@ -1,0 +1,5 @@
+#!/bin/bash
+
+for arg in "${@}"; do
+  python3 processing_packages/print_ports.py "$(realpath $arg)/packets.pcap"
+done
